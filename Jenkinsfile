@@ -24,6 +24,11 @@ pipeline {
             }
         }
        }
+        stage("Quality gate") {
+            steps {
+                waitForQualityGate abortPipeline: true
+            }
+        }
         stage('Deploy to Tomcat') {
             steps {
                 deploy adapters: [tomcat9(credentialsId: 'tomcat', path: '', url: 'http://34.227.56.60:8080/')], contextPath: 'path', war: '**/*.war'
