@@ -17,13 +17,40 @@ pipeline {
                 sh 'cd MyWebApp mvn test'
             }
         }
-         stage ('Code Quality scan')  {
+
+       stage ('Code Quality scan')  {
            steps{
-       withSonarQubeEnv('sonar') {
+       withSonarQubeEnv('my-sonar') {
        sh "mvn -f MyWebApp/pom.xml sonar:sonar"
             }
         }
        }
+
+        stage ('Artifactory configuration') {
+
+            steps {
+
+                rtServer (
+
+                    id: "jfrog",
+
+                    url: "http://18.204.13.52:8082//artifactory",
+
+                    credentialsId: "jfrog-art",
+                    bypassProxy: true
+
+                )
+            }
+        }
+
+        stage('Deploy Artifacts') {
+            steps {
+                rtUpload (
+                    serverId: 'jfrog'
+            )
+        }
+    }
+
         stage("Quality gate") {
             steps {
                 waitForQualityGate abortPipeline: true
@@ -36,3 +63,4 @@ pipeline {
         }
     }
 }
+
